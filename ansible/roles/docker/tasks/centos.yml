@@ -1,0 +1,31 @@
+- name: Upgrade all packages
+  yum: name=* state=latest
+
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+
+- name: install dependences
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - yum-utils 
+    - device-mapper-persistent-data 
+    - lvm2
+    - python3-pip
+    - docker-ce-cli 
+    - containerd.io
+    - docker-ce
+  
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: docker-compose
+  pip:
+    name: docker-compose
+    executable: pip3

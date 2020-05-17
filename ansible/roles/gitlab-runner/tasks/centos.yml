@@ -1,0 +1,33 @@
+- name: Pre-task - Installing pygpgme
+  yum:
+    name: http://mirror.centos.org/centos/7/os/x86_64/Packages/pygpgme-0.3-9.el7.x86_64.rpm
+  when: ansible_facts['distribution_major_version'] == "8"
+
+- name: Install gitLab-runner main dependencies
+  yum:
+    name: 
+      - pygpgme
+      - yum-utils
+  
+- name: Add gitlab-runner repository
+  yum_repository:
+    name: gitlab-runner
+    description: Gitlab YUM repo
+    baseurl: https://packages.gitlab.com/runner/gitlab-runner/el/7/$basearch
+    gpgcheck: yes
+    gpgkey: https://packages.gitlab.com/runner/gitlab-runner/gpgkey
+
+- name: Install gitLab-runner
+  yum:
+    name: gitlab-runner
+    state: latest
+    update_cache: yes
+
+- name: Delete files from gitlab-runner's home folder
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+  - /home/gitlab-runner/.bashrc
+  - /home/gitlab-runner/.profile
+  - /home/gitlab-runner/.bash_logout

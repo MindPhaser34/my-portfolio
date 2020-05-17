@@ -1,0 +1,33 @@
+- name: Creating admins user
+  user:
+    name: admins
+    comment: admins group
+    group: "{{ admin_group }}"
+    move_home: yes
+    shell: /bin/bash
+
+- name: Allow passwordless sudo
+  template: 
+    src: files/sudo_all.j2
+    dest: /etc/sudoers.d/admins
+    validate: 'visudo -cf %s'
+    mode: 0440
+
+- name: Set up authorized keys for the admins user
+  authorized_key:
+    user: admins
+    state: present
+    exclusive: yes
+    key: '{{ item }}'
+  with_file:
+    - files/admins.pub
+
+- name: Add admins to groups
+  user:
+    name: admins
+    groups: "{{ item }}"
+    append: yes
+  when: item in ansible_facts.getent_group
+  with_items: 
+      - docker
+      - systemd-journal

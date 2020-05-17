@@ -1,0 +1,5 @@
+[Service]
+EnvironmentFile=-/etc/default/docker
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// $DOCKER_OPTS
+

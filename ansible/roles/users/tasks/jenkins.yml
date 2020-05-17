@@ -1,0 +1,28 @@
+- name: Creating jenkins user on {{ inventory_hostname }}
+  user:
+    name: jenkins
+    comment: Jenkins agent
+    move_home: yes
+    shell: /bin/sh
+
+- name: Add jenkins to groups
+  user:
+    name: jenkins
+    groups: "{{ item }}"
+    append: yes
+  when: item in ansible_facts.getent_group
+  with_items: 
+      - docker
+
+- authorized_key:
+    user: jenkins
+    state: present
+    exclusive: yes
+    # paste ssh-rsa key for jenkins-user
+    key: ssh-rsa <...> jenkins@pubkey
+
+- name: Allow sudo for jenkins
+  copy: 
+    src: files/jenkins.sudo
+    dest: /etc/sudoers.d/jenkins
+    mode: 0440

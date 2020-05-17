@@ -1,0 +1,35 @@
+- name: Installing requirements
+  apt:
+    name: curl,gnupg,debian-archive-keyring,apt-transport-https
+    state: present
+
+- apt_key:
+    url: https://packages.gitlab.com/runner/gitlab-runner/gpgkey
+    state: present
+
+- apt_repository:
+    repo: deb https://packages.gitlab.com/runner/gitlab-runner/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} main
+    state: present
+    filename: gitlab-runner
+
+- name: Download from repo
+  apt:
+    name: gitlab-runner,gitlab-ci-multi-runner
+    state: present
+    update_cache: yes
+
+- name: Delete profile files
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+  - /home/gitlab-runner/.bashrc
+  - /home/gitlab-runner/.profile
+  - /home/gitlab-runner/.bash_logout
+
+- name: Make service gitlab-runner is running
+  systemd:
+    name: gitlab-runner
+    state: started
+    enabled: yes
+      

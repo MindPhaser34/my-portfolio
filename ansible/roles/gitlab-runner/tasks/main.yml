@@ -1,0 +1,23 @@
+- name: Determine available groups
+  getent:
+    database: group
+
+- import_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- import_tasks: centos.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Allow sudo for runner
+  template: 
+    src: files/sudo
+    dest: /etc/sudoers.d/gitlab-runner
+    validate: 'visudo -cf %s'
+    mode: 0440
+
+- name: Enable access to Docker
+  user:
+    name: gitlab-runner
+    groups: docker
+    append: yes
+  when: "'docker' in ansible_facts.getent_group"
