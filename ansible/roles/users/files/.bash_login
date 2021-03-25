@@ -1,9 +1,0 @@
-if [[ "${TERM}" != "screen" ]]
-then
-    if tmux has-session -t $USER
-    then
-        tmux attach-session -t $USER
-    else
-        tmux new-session -s $USER
-    fi
-fi
