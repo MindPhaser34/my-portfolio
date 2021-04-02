@@ -1,0 +1,38 @@
+#Image with some devops tools
+
+FROM alpine:latest
+
+RUN apk add --no-cache bash curl python3 py3-pip py3-cryptography make unzip tar sudo docker docker-compose wget git git-crypt && \
+    htop iotop make openssl iproute2 iputils tcpdump nmap net-tools openssh-server openssh-client screen vim nano mc && \
+    apk --update add --virtual build-dependencies build-base python3-dev libffi-dev openssl-dev gcc && \
+    rm -rf /var/cache/apk/* && apk del build-dependencies
+
+# ansible
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && pip3 install --no-cache-dir --upgrade pip && python3 -m pip install ansible 
+
+# install kubectl
+RUN KUBECTL_VER=1.18.0 \
+    && wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VER}/bin/linux/amd64/kubectl chmod +x /usr/local/bin/kubectl
+
+# awscli
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install
+
+# s5cmd
+RUN S5CMD_VER=1.2.1 \
+    && wget https://github.com/peak/s5cmd/releases/download/v${S5CMD_VER}/s5cmd_${S5CMD_VER}_Linux-64bit.tar.gz && tar -xf s5cmd_${S5CMD_VER}_Linux-64bit.tar.gz && mv s5cmd /usr/local/bin/
+
+# yandex cli
+RUN curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+
+# helm
+RUN HELM_VER=3.5.3 \
+    && wget -O- https://get.helm.sh/helm-v${HELM_VER}-linux-amd64.tar.gz | tar -C /tmp -zxf - && mv /tmp/linux-amd64/helm /usr/local/bin/helm
+
+# terraform
+RUN TF_VER=0.14.7 \
+    && wget https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip && unzip terraform_${TF_VER}_linux_amd64.zip && mv terraform /usr/local/bin/
+
+# SSH Port
+EXPOSE 22
+
+CMD ["/bin/bash"]
