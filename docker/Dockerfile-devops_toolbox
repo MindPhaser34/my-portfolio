@@ -30,7 +30,7 @@ RUN HELM_VER=3.5.3 \
 
 # terraform
 RUN TF_VER=0.14.7 \
-    && wget https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip && unzip terraform_${TF_VER}_linux_amd64.zip && mv terraform /usr/local/bin/
+    && wget https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip && unzip terraform_${TF_VER}_linux_amd64.zip && mv terraform /usr/local/bin/ && rm -rf terraform_${TF_VER}_linux_amd64.zip
 
 # SSH Port
 EXPOSE 22
