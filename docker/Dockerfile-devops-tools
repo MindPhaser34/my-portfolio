@@ -1,0 +1,43 @@
+FROM alpine:latest
+
+RUN apk add --no-cache bash curl python3 tar sudo docker docker-compose wget git git-crypt \
+    htop iotop make openssl iproute2 iputils tcpdump nmap net-tools openssh-server openssh-client screen vim nano mc && \
+    apk --update add --virtual build-dependencies build-base && \
+    rm -rf /var/cache/apk/* && apk del --purge build-dependencies
+
+# awscli
+RUN curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip && unzip awscliv2.zip && sudo ./aws/install && rm awscliv2.zip
+
+# gcloud
+RUN curl https://sdk.cloud.google.com | bash > /dev/null && export PATH=$PATH:/root/google-cloud-sdk/bin 
+
+# yandex-cli
+RUN curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+
+# ansible & azure-cli
+RUN ANSIBLE_VER=2.15.3 \
+    && apk add py3-pip py3-cryptography gcc musl-dev python3-dev libffi-dev openssl-dev cargo && pip install --upgrade pip && pip install setuptools ansible-core==${ANSIBLE_VER} ansible-lint azure-cli && rm -rf /var/cache/apk/*
+
+# install kubectl
+RUN KUBECTL_VER=1.27.4 \
+    && wget -O /usr/local/bin/kubectl https://dl.k8s.io/release/v${KUBECTL_VER}/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl
+
+# s5cmd
+RUN S5CMD_VER=2.1.0 \
+    && wget https://github.com/peak/s5cmd/releases/download/v${S5CMD_VER}/s5cmd_${S5CMD_VER}_Linux-64bit.tar.gz && tar -xf s5cmd_${S5CMD_VER}_Linux-64bit.tar.gz -C /usr/local/bin/ && rm s5cmd_${S5CMD_VER}_Linux-64bit.tar.gz
+
+# helm
+RUN apk curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash 
+
+# terraform
+RUN TF_VER=1.5.5 \
+    && wget https://releases.hashicorp.com/terraform/${TF_VER}/terraform_${TF_VER}_linux_amd64.zip && unzip terraform_${TF_VER}_linux_amd64.zip && mv terraform /usr/local/bin/ && rm terraform_${TF_VER}_linux_amd64.zip
+
+# geth
+RUN GETH_VER=1.12.2-bed84606 \
+    && wget https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-${GETH_VER}.tar.gz && tar -C /tmp -zxf geth-linux-amd64-${GETH_VER}.tar.gz && mv /tmp/geth-linux-amd64-${GETH_VER}/geth /usr/local/bin/geth && rm -rf /tmp/geth-linux-amd64-${GETH_VER} && rm geth-linux-amd64-${GETH_VER}.tar.gz
+
+# SSH Port
+EXPOSE 22
+
+CMD ["/bin/bash"]
